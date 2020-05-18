@@ -9,6 +9,7 @@ class Sequential(Module):
     def forward(self, input):
         inp = input
         for layer in self.layers:
+            
             out = layer.forward(inp)
             inp = out
         return out
@@ -17,3 +18,12 @@ class Sequential(Module):
         grad_tmp = grad
         for layer in reversed(self.layers):
             grad_tmp = layer.backward(grad_tmp)
+
+    def param(self):
+        weights = []
+        biases = []
+        for l in self.layers:
+            if l.param():
+                weights.extend(l.param()[0])
+                biases.extend(l.param()[0])
+        return [weights, biases]

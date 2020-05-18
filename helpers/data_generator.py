@@ -6,7 +6,7 @@ import torch
 def generate_data(nb = 1000):
     data = torch.rand(2, nb)
     radius = 1 / math.sqrt(2 * math.pi)
-    distances = data.pow(2).sum(dim=0)
+    distances = (data-0.5).pow(2).sum(dim=0).sqrt()
     label = distances <= radius
     return data.t(), label.int()
 

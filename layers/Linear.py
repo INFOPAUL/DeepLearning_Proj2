@@ -36,12 +36,12 @@ class Linear(Module):
     def forward(self, input):
         self.input = input.clone()
         res = input.mm(self.weight)
-        if self.bias != None:
+        if self.bias is not None:
             res.add(self.bias)
         return res
 
     def backward(self, grad):
-        if self.bias != None:
+        if self.bias is not None:
             self.bias_grad += grad.sum(dim=0)
 
         self.weight_grad += self.input.t().mm(grad)
@@ -55,6 +55,6 @@ class Linear(Module):
         func(self.weight, self.bias, self.bias_grad, self.weight_grad)
 
     def zero_grad(self):
-        if self.bias != None:
+        if self.bias is not None:
             self.bias_grad.zero_()
         self.weight_grad.zero_()

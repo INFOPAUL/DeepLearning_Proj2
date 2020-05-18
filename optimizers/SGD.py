@@ -9,7 +9,7 @@ class SGD():
 
     def update_rule(self, weight, bias, bias_grad, weight_grad):
         weight -= self.lr  * weight_grad
-        if bias != None:
+        if bias is not None:
             bias -= self.lr  * bias_grad
 
     def step(self):

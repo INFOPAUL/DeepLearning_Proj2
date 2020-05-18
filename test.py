@@ -16,66 +16,127 @@ def accuracy(predicted_logits, reference, argmax=True):
         labels = torch.argmax(predicted_logits, 1)
     else:
         labels = predicted_logits
-    correct_predictions = labels.eq(reference)
+    correct_predictions = labels.int().eq(reference.int())
     return correct_predictions.sum().float() / correct_predictions.nelement()
 
-torch.set_grad_enabled(False)
+def train(epochs, batch_size, lr, verbose):
 
-train_data, train_label = generate_data()
-test_data, test_label = generate_data()
+    # autograd globally off
+    torch.set_grad_enabled(False)
+    # generate training and testing datasets
+    train_data, train_label = generate_data()
+    test_data, test_label = generate_data()
+    # normalize data be centered at 0
+    train_data, test_data = normalize(train_data, test_data)
 
-train_data, test_data = normalize(train_data, test_data)
+    if verbose:
+        print("--- Dataset ---")
+        print("Train X: ", train_data.size(), " | Train y: ", train_label.size())
+        print(" Test X: ",  test_data.size(), " |  Test y: ", test_label.size())
 
-layers =[]
-#input layer
-linear1 = Linear(2, 25, bias= True, weight_init=xavier_uniform)
+    layers =[]
+    # input layer (2 input units)
+    linear1 = Linear(2, 25, bias= True, weight_init=xavier_uniform)
 
-#hidden layers
-linear2 = Linear(25, 25, bias= True, weight_init=xavier_uniform)
-linear3 = Linear(25, 25, bias= True, weight_init=xavier_uniform)
-linear4 = Linear(25, 25, bias= True, weight_init=xavier_uniform)
+    # 3 hidden layers (each 25 units)
+    linear2 = Linear(25, 25, bias= True, weight_init=xavier_uniform)
+    linear3 = Linear(25, 25, bias= True, weight_init=xavier_uniform)
+    linear4 = Linear(25, 25, bias= True, weight_init=xavier_uniform)
 
-#output layer
-linear5 = Linear(25, 2, bias= True, weight_init=xavier_uniform)
+    # output layer (2 output units)
+    linear5 = Linear(25, 2, bias= True, weight_init=xavier_uniform)
 
 
-layers.append(linear1)
-layers.append(Relu())
-layers.append(linear2)
-layers.append(Relu())
-layers.append(linear3)
-layers.append(Relu())
-layers.append(linear4)
-layers.append(Tanh())
-layers.append(linear5)
+    layers.append(linear1)
+    layers.append(Relu())
+    layers.append(linear2)
+    layers.append(Relu())
+    layers.append(linear3)
+    layers.append(Relu())
+    layers.append(linear4)
+    layers.append(Tanh())
+    layers.append(linear5)
 
-model = Sequential(layers)
+    model = Sequential(layers)
+    if verbose: print("Number of model parameters: {}".format(sum([len(p) for p in model.param()])))
 
-criterion = MSE()
-optimizer = SGD(model, lr = 0.01)
+    criterion = MSE()
+    optimizer = SGD(model, lr=lr)
 
-for e in range(50):
-    for b in range(0, train_data.size(0), 100):
+    train_losses, test_losses = [], []
+    train_accuracies, test_accuracies = [], []
+    train_errors, test_errors = [], []
 
-        output = model.forward(train_data.narrow(0, b, 100))
+    if verbose: print("--- Training ---")
+    for epoch in range(1, epochs+1):
+        if verbose:print("Epoch: {}".format(epoch))
 
-        # Calculate loss
-        loss = criterion.forward(output, train_label.narrow(0, b, 100))
+        # TRAINING
+        for batch_idx in range(0, train_data.size(0), batch_size):
+            # axis 0, start from batch_idx until batch_idx+batch_size
+            output = model.forward(train_data.narrow(0, batch_idx, batch_size))
 
-        # put to zero weights and bias
-        optimizer.zero_grad()
+            # Calculate loss
+            loss = criterion.forward(output, train_label.narrow(0, batch_idx, batch_size))
+            train_losses.append(loss)
+            if verbose: print("Train Loss: {:.2e}".format(loss.item()))
 
-        ##Backpropagation
-        # Calculate grad of loss
-        loss_grad = criterion.backward()
+            # put to zero weights and bias
+            optimizer.zero_grad()
 
-        # Grad of the model
-        model.backward(loss_grad)
+            ## Backpropagation
+            # Calculate grad of loss
+            loss_grad = criterion.backward()
 
-        # Update parameters
-        optimizer.step()
+            # Grad of the model
+            model.backward(loss_grad)
 
-        #print(loss)
+            # Update parameters
+            optimizer.step()
 
-    test_prediction = model.forward(test_data)
-    print(accuracy(test_prediction, test_label))
+        train_prediction = model.forward(train_data)
+        acc = accuracy(train_prediction, train_label)
+        train_accuracies.append(acc)
+        train_errors.append(1-acc)
+        if verbose: print("Train Accuracy: {:.2e}".format(acc.item()))
+
+        # EVALUATION
+        for batch_idx in range(0, test_data.size(0), batch_size):
+            # axis 0, start from batch_idx until batch_idx+batch_size
+            output = model.forward(test_data.narrow(0, batch_idx, batch_size))
+
+            # Calculate loss
+            loss = criterion.forward(output, test_label.narrow(0, batch_idx, batch_size))
+            test_losses.append(loss)
+            if verbose: print("Test Loss: {:.2e}".format(loss.item()))
+
+            # put to zero weights and bias
+            optimizer.zero_grad()
+
+            ## Backpropagation
+            # Calculate grad of loss
+            loss_grad = criterion.backward()
+
+            # Grad of the model
+            model.backward(loss_grad)
+
+            # Update parameters
+            optimizer.step()
+
+        test_prediction = model.forward(test_data)
+        acc = accuracy(test_prediction, test_label)
+        test_accuracies.append(acc)    
+        test_errors.append(1-acc)
+        if verbose: print("Test Accuracy: {:.2e}".format(acc.item()))
+
+    return train_losses, test_losses, train_accuracies, test_accuracies, train_errors, test_errors 
+        
+
+if __name__ == "__main__":
+    epochs = 100
+    batch_size = 100
+    verbose = True
+    lr = 0.1
+
+    train(epochs, batch_size, lr, verbose);
+    
