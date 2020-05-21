@@ -111,17 +111,17 @@ def train(epochs, batch_size, lr, verbose):
             if verbose: print("Test Loss: {:.2e}".format(loss.item()))
 
             # put to zero weights and bias
-            optimizer.zero_grad()
+            #optimizer.zero_grad()
 
             ## Backpropagation
             # Calculate grad of loss
-            loss_grad = criterion.backward()
+            #loss_grad = criterion.backward()
 
             # Grad of the model
-            model.backward(loss_grad)
+            #model.backward(loss_grad)
 
             # Update parameters
-            optimizer.step()
+            #optimizer.step()
 
         test_prediction = model.forward(test_data)
         acc = accuracy(test_prediction, test_label)
