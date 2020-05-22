@@ -2,11 +2,13 @@ from Module import Module
 
 
 class Sequential(Module):
+    """Sequential class implementing the model with several different layers"""
     def __init__(self, layers):
-        super(Sequential, self).__init__()
+        super().__init__()
         self.layers = layers
 
     def forward(self, input):
+        """Forward pass for Sequential"""
         inp = input
         for layer in self.layers:
             
@@ -15,11 +17,13 @@ class Sequential(Module):
         return out
 
     def backward(self, grad):
+        """Backward pass for the Sequential"""
         grad_tmp = grad
         for layer in reversed(self.layers):
             grad_tmp = layer.backward(grad_tmp)
 
     def param(self):
+        """Get model parameters"""
         weights = []
         biases = []
         for l in self.layers:

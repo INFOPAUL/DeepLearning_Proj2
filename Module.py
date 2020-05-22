@@ -1,5 +1,9 @@
 
 class Module(object):
+    """Module interface class
+    
+    Initializes the methods that needs to be implemented in children classes
+    """
     def forward(self , input):
         raise  NotImplementedError
 

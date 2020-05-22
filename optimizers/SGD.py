@@ -1,8 +1,20 @@
 import torch
 
 
-
 class SGD():
+    """Implements stochastic gradient descent.
+
+    Parameters
+    ----------
+        models: model
+        lr (float): learning rate
+
+    Example
+    -------
+        >>> optimizer = SGD(model, lr=0.1)
+        >>> optimizer.zero_grad()
+        >>> optimizer.step()
+    """
     def __init__(self, model, lr=0.001):
         self.lr = lr
         self.model = model

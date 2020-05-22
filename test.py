@@ -20,7 +20,7 @@ def accuracy(predicted_logits, reference, argmax=True):
     return correct_predictions.sum().float() / correct_predictions.nelement()
 
 def train(epochs, batch_size, lr, verbose):
-
+    """Main method that trains the network"""
     # autograd globally off
     torch.set_grad_enabled(False)
     # generate training and testing datasets
@@ -110,19 +110,6 @@ def train(epochs, batch_size, lr, verbose):
             test_losses.append(loss)
             if verbose: print("Test Loss: {:.2e}".format(loss.item()))
 
-            # put to zero weights and bias
-            #optimizer.zero_grad()
-
-            ## Backpropagation
-            # Calculate grad of loss
-            #loss_grad = criterion.backward()
-
-            # Grad of the model
-            #model.backward(loss_grad)
-
-            # Update parameters
-            #optimizer.step()
-
         test_prediction = model.forward(test_data)
         acc = accuracy(test_prediction, test_label)
         test_accuracies.append(acc)    
@@ -133,10 +120,10 @@ def train(epochs, batch_size, lr, verbose):
         
 
 if __name__ == "__main__":
-    epochs = 100
+    epochs = 300
     batch_size = 100
     verbose = True
-    lr = 0.1
+    lr = 0.05
 
     train(epochs, batch_size, lr, verbose);
     
