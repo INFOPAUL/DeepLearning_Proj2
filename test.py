@@ -79,7 +79,7 @@ def train(epochs, batch_size, lr, verbose):
             # Calculate loss
             loss = criterion.forward(output, train_label.narrow(0, batch_idx, batch_size))
             train_losses.append(loss)
-            if verbose: print("Train Loss: {:.2e}".format(loss.item()))
+            if verbose: print("Train Loss: {:.2f}".format(loss.item()))
 
             # put to zero weights and bias
             optimizer.zero_grad()
@@ -98,7 +98,7 @@ def train(epochs, batch_size, lr, verbose):
         acc = accuracy(train_prediction, train_label)
         train_accuracies.append(acc)
         train_errors.append(1-acc)
-        if verbose: print("Train Accuracy: {:.2e}".format(acc.item()))
+        if verbose: print("Train Accuracy: {:.2f}".format(acc.item()))
 
         # EVALUATION
         for batch_idx in range(0, test_data.size(0), batch_size):
@@ -108,13 +108,13 @@ def train(epochs, batch_size, lr, verbose):
             # Calculate loss
             loss = criterion.forward(output, test_label.narrow(0, batch_idx, batch_size))
             test_losses.append(loss)
-            if verbose: print("Test Loss: {:.2e}".format(loss.item()))
+            if verbose: print("Test Loss: {:.2f}".format(loss.item()))
 
         test_prediction = model.forward(test_data)
         acc = accuracy(test_prediction, test_label)
         test_accuracies.append(acc)    
         test_errors.append(1-acc)
-        if verbose: print("Test Accuracy: {:.2e}".format(acc.item()))
+        if verbose: print("Test Accuracy: {:.2f}".format(acc.item()))
 
     return train_losses, test_losses, train_accuracies, test_accuracies, train_errors, test_errors 
         
