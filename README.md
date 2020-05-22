@@ -19,11 +19,8 @@ Must implement a test executable named `test.py` that imports the framework and
 - computes and prints the final train and the test errors.
 
 ## Visualization
-![](iterations.gif)
+Sequential model with ReLU activation function:  
+![](iterations_relu.gif)
 
-## TODOs:
-new activation functions can be added
-
-new weight initializations can be added
-
-training pipeline can be improved
+Sequential model with Mish activation function:  
+![](iterations_mish.gif)
